@@ -1,0 +1,15 @@
+test
+*.o
+*~
+\#*#
+.#*
+*.user*
+*.xml
+*_Debug
+*_Release
+*.orig
+*.so
+*.mp3
+*.a
+*.test
+*.cmake

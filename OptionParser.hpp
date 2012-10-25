@@ -1,64 +1,12 @@
+#ifndef OPTIONPARSER_H_
+#define OPTIONPARSER_H_
+
 /**
  * Copyright (C) 2010 Johannes Weißl <jargon@molb.org>
  * License: your favourite BSD-style license
  *
- * git clone http://github.com/weisslj/cpp-optparse.git
- *
- * This is yet another option parser for C++. It is modelled after the
- * excellent Python optparse API. Although incomplete, anyone familiar to
- * optparse should feel at home:
- * http://docs.python.org/library/optparse.html
- *
- * Design decisions:
- * - elegant and easy usage more important than speed / flexibility
- * - shortness more important than feature completeness
- *   * no unicode
- *   * no checking for user programming errors
- *
- * Why not use getopt/getopt_long?
- * - not C++ / not completely POSIX
- * - too cumbersome to use, would need lot of additional code
- *
- * Why not use Boost.Program_options?
- * - boost not installed on all target platforms (esp. cluster, HPC, ...)
- * - too big to include just for option handling:
- *   322 *.h (44750 lines) + 7 *.cpp (2078 lines)
- *
- * Why not use tclap/Opag/Options/CmdLine/Anyoption/Argument_helper/...?
- * - no reason, writing one is faster than code inspection :-)
- * - similarity to Python desired for faster learning curve
- *
- * Future work:
- * - nargs > 1?
- * - comments?
- *
- * Python only features:
- * - conflict handlers
- * - adding new actions
- *
- *
- * Example:
- *
- * using optparse::OptionParser;
- *
- * OptionParser parser = OptionParser() .description("just an example");
- *
- * parser.add_option("-f", "--file") .dest("filename")
- *                   .help("write report to FILE") .metavar("FILE");
- * parser.add_option("-q", "--quiet")
- *                   .action("store_false") .dest("verbose") .set_default("1")
- *                   .help("don't print status messages to stdout");
- * 
- * optparse::Values options = parser.parse_args(argc, argv);
- * vector<string> args = parser.args();
- *
- * if (options.get("verbose"))
- *     cout << options["filename"] << endl;
- *
+ * See OptionParser.h for help.
  */
-
-#ifndef OPTIONPARSER_H_
-#define OPTIONPARSER_H_
 
 #include <string>
 #include <vector>
@@ -70,22 +18,22 @@
 
 namespace optparse {
 
-class OptionParser;
-class OptionGroup;
-class Option;
-class Values;
-class Value;
-class Callback;
+  class OptionParser;
+  class OptionGroup;
+  class Option;
+  class Values;
+  class Value;
+  class Callback;
 
-typedef std::map<std::string,std::string> strMap;
-typedef std::map<std::string,std::list<std::string> > lstMap;
-typedef std::map<std::string,Option const*> optMap;
+  typedef std::map<std::string,std::string> strMap;
+  typedef std::map<std::string,std::list<std::string> > lstMap;
+  typedef std::map<std::string,Option const*> optMap;
 
-const char* const SUPPRESS_HELP = "SUPPRESS" "HELP";
-const char* const SUPPRESS_USAGE = "SUPPRESS" "USAGE";
+  const char* const SUPPRESS_HELP = "SUPPRESS" "HELP";
+  const char* const SUPPRESS_USAGE = "SUPPRESS" "USAGE";
 
-//! Class for automatic conversion from string -> anytype
-class Value {
+  //! Class for automatic conversion from string -> anytype
+  class Value {
   public:
     Value() : str(), valid(false) {}
     Value(const std::string& v) : str(v), valid(true) {}
@@ -100,12 +48,12 @@ class Value {
     operator float() { float t; return (valid && (std::istringstream(str) >> t)) ? t : 0; }
     operator double() { double t; return (valid && (std::istringstream(str) >> t)) ? t : 0; }
     operator long double() { long double t; return (valid && (std::istringstream(str) >> t)) ? t : 0; }
- private:
+  private:
     const std::string str;
     bool valid;
-};
+  };
 
-class Values {
+  class Values {
   public:
     Values() : _map() {}
     const std::string& operator[] (const std::string& d) const;
@@ -124,9 +72,9 @@ class Values {
     strMap _map;
     lstMap _appendMap;
     std::set<std::string> _userSet;
-};
+  };
 
-class OptionParser {
+  class OptionParser {
   public:
     OptionParser();
     virtual ~OptionParser() {}
@@ -187,6 +135,8 @@ class OptionParser {
     void error(const std::string& msg) const;
     void exit() const;
 
+    std::list<std::string>	getArgs(void) const { return (_forend); };
+
   private:
     const Option& lookup_short_opt(const std::string& opt) const;
     const Option& lookup_long_opt(const std::string& opt) const;
@@ -215,11 +165,12 @@ class OptionParser {
     strMap _defaults;
     std::list<OptionGroup const*> _groups;
 
+    std::list<std::string> _forend;
     std::list<std::string> _remaining;
     std::list<std::string> _leftover;
-};
+  };
 
-class OptionGroup : public OptionParser {
+  class OptionGroup : public OptionParser {
   public:
     OptionGroup(const OptionParser& p, const std::string& t, const std::string& d = "") :
       _parser(p), _title(t), _group_description(d) {}
@@ -234,9 +185,9 @@ class OptionGroup : public OptionParser {
     const OptionParser& _parser;
     std::string _title;
     std::string _group_description;
-};
+  };
 
-class Option {
+  class Option {
   public:
     Option() : _action("store"), _type("string"), _nargs(1), _callback(0) {}
     virtual ~Option() {}
@@ -288,13 +239,13 @@ class Option {
     Callback* _callback;
 
     friend class OptionParser;
-};
+  };
 
-class Callback {
-public:
-  virtual void operator() (const Option& option, const std::string& opt, const std::string& val, const OptionParser& parser) = 0;
-  virtual ~Callback() {}
-};
+  class Callback {
+  public:
+    virtual void operator() (const Option& option, const std::string& opt, const std::string& val, const OptionParser& parser) = 0;
+    virtual ~Callback() {}
+  };
 
 }
 
